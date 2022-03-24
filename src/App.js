@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 
 import Note from './components/notes'
 import noteService from './services/notes'
@@ -34,12 +34,15 @@ const App = () => {
   }, [])
 
   const addNote = (noteObject) => {
+    noteFormRef.current.toggleVisibility()
     noteService
       .create(noteObject)
       .then(returnedNote => {
         setNotes(notes.concat(returnedNote))
       })
   }
+
+  const noteFormRef = useRef()
 
   const handleLogin = async (event) => {
     event.preventDefault()
@@ -74,7 +77,7 @@ const App = () => {
   const toggleImportanceOf = id => {
     const note = notes.find(n => n.id === id)
     const changedNote = { ...note, important: !note.important }
-  
+
     noteService
       .update(id, changedNote)
       .then(returnedNote => {
@@ -100,30 +103,29 @@ const App = () => {
       <h1>Notes</h1>
 
       {user === null ?
-      <Togglable buttonLabel='login'>
-      <LoginForm
-        username={username}
-        password={password}
-        handleUsernameChange={({ target }) => setUsername(target.value)}
-        handlePasswordChange={({ target }) => setPassword(target.value)}
-        handleSubmit={handleLogin}
-      />
-    </Togglable> :
-    <div>
-      <p>{user.username} logged in <button onClick={handleLogout}>logout</button></p>
-      
-      <Togglable buttonLabel="new note">
-        <NoteForm createNote={addNote} />
-      </Togglable>
-      </div>
-    }
+        <Togglable buttonLabel='login'>
+          <LoginForm
+            username={username}
+            password={password}
+            handleUsernameChange={({ target }) => setUsername(target.value)}
+            handlePasswordChange={({ target }) => setPassword(target.value)}
+            handleSubmit={handleLogin}
+          />
+        </Togglable> :
+        <div>
+          <p>{user.username} logged in <button onClick={handleLogout}>logout</button></p>
+          <Togglable buttonLabel="new note" ref={noteFormRef} >
+            <NoteForm createNote={addNote}/>
+          </Togglable>
+        </div>
+      }
       <div>
         <button onClick={() => setShowAll(!showAll)}>
           show {showAll ? 'important' : 'all' }
         </button>
-      </div>   
+      </div>
       <ul>
-        {notesToShow.map(note => 
+        {notesToShow.map(note =>
           <Note
             key={note.id}
             note={note}
@@ -131,7 +133,6 @@ const App = () => {
           />
         )}
       </ul>
-      
     </div>
   )
 }
