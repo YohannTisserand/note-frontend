@@ -1,4 +1,8 @@
 import { useState, useEffect, useRef } from 'react'
+// import {
+//   BrowserRouter as Router,
+//   Routes, Route, Link
+// } from 'react-router-dom'
 
 import Note from './components/notes'
 import noteService from './services/notes'
@@ -6,6 +10,7 @@ import loginService from './services/login'
 import LoginForm from './components/loginForm'
 import Togglable from './components/toggable'
 import NoteForm from './components/noteFrom'
+import Notification from './components/notifications'
 
 const App = () => {
   const [notes, setNotes] = useState([])
@@ -72,6 +77,7 @@ const App = () => {
     if (loggedUserJSON) {
       window.localStorage.removeItem('loggedNoteappUser')
     }
+    return event
   }
 
   const toggleImportanceOf = id => {
@@ -91,6 +97,7 @@ const App = () => {
           setErrorMessage(null)
         }, 5000)
         setNotes(notes.filter(n => n.id !== id))
+        return error
       })
   }
 
@@ -98,10 +105,14 @@ const App = () => {
     ? notes
     : notes.filter(note => note.important)
 
+  // const padding = {
+  //   padding: 5
+  // }
+
   return (
     <div>
       <h1>Notes</h1>
-
+      <Notification message={errorMessage} />
       {user === null ?
         <Togglable buttonLabel='login'>
           <LoginForm
@@ -113,7 +124,7 @@ const App = () => {
           />
         </Togglable> :
         <div>
-          <p>{user.username} logged in <button onClick={handleLogout}>logout</button></p>
+          <p>{user.username} logged in <button onClick={handleLogout}>Logout</button></p>
           <Togglable buttonLabel="new note" ref={noteFormRef} >
             <NoteForm createNote={addNote}/>
           </Togglable>
